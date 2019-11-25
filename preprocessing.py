@@ -13,9 +13,9 @@ from nltk.tokenize import TweetTokenizer
 
 def import_data(path, delimiter="|"):
     """
-    Prepares data by
-    :param path:
-    :return:
+    Prepares data by sanitizing and putting into dataframe
+    :param path: Path to the .csv containing the tweets
+    :return: a shuffled dataframe containing all tweets and associated metadata
     """
     f = open(path, "r").readlines()
     f = [line.encode('ascii', 'ignore').decode('ascii').lower() for line in f]  # strip emoji from text, make lowercase
@@ -29,6 +29,12 @@ def import_data(path, delimiter="|"):
     return df.sample(frac=1) # shuffle and return
 
 def split_data(df, split=0.8):
+    """
+    Splits dataframe into training and testing datasets
+    :param df: The original dataframe
+    :param split: The proportion of the dataframe to use as the training data; the remainder is the testing data.
+    :return: Two dataframes, training and testing.
+    """
     training = df.sample(frac=split, random_state=0)
     testing = df.drop(training.index)
 
@@ -72,7 +78,3 @@ if __name__ == "__main__":
     training_labels = training["source"]
     testing_tweets = testing["tokenized_text"]
     testing_labels = testing["source"]
-
-    print(data)
-    exit(5)
-    model = build_classifier()
