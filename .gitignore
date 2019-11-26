@@ -1,2 +1,3 @@
 glove.6B.100d.txt
-.ipynb_checkpoints/* 
+.ipynb_checkpoints/ 
+.embeddings/
