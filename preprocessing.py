@@ -8,8 +8,8 @@ from io import StringIO
 from keras.models import Sequential
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Dense, LSTM, Dropout, Bidirectional, Embedding
-from nltk.tokenize import TweetTokenizer
-
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
 
 def import_data(path, delimiter="|"):
     """
@@ -17,11 +17,14 @@ def import_data(path, delimiter="|"):
     :param path: Path to the .csv containing the tweets
     :return: a shuffled dataframe containing all tweets and associated metadata
     """
-    f = open(path, "r").readlines()
-    f = [line.encode('ascii', 'ignore').decode('ascii').lower() for line in f]  # strip emoji from text, make lowercase
-    f = "".join(f)  # turn into singular string
-    df = pd.read_csv(StringIO(f), sep=delimiter, error_bad_lines=False)  # Currently skipping bad lines, should prune later
-    replacement_dict = {"Twitter for iPhone".lower() : 1, "Twitter for Android".lower() : 0}
+
+    # f = open(path, "r").readlines()
+    # f = [line.encode('ascii', 'ignore').decode('ascii').lower() for line in f]  # strip emoji from text, make lowercase
+    # f = "".join(f)  # turn into singular string
+    # df = pd.read_csv(StringIO(f), sep=delimiter, error_bad_lines=False)  # Currently skipping bad lines, should prune later
+
+    df = pd.read_json("/home/gringle/Downloads/trump_tweets_11_17.json")
+    replacement_dict = {"Twitter for iPhone": 1, "Twitter for Android": 0}
     df = df.replace(to_replace=replacement_dict)   # replace labels
 
     df = df[df.source.apply(lambda x: type(x) == int)]  # remove tweets from other sources
@@ -41,9 +44,13 @@ def split_data(df, split=0.8):
     return training, testing
 
 def tokenize(data):
-    tokenizer = TweetTokenizer()
-    data['tokenized_text'] = data['text'].apply(tokenizer.tokenize)
-
+    tokenizer = Tokenizer(num_words=15000)
+    tokenizer.fit_on_texts(data["text"])
+    sequences = tokenizer.texts_to_sequences(data["text"])
+    text_sequences = pad_sequences(sequences, maxlen=65)
+    print(text_sequences.shape)
+    exit(5)
+    data['tokenized_text'] = text_sequences
     return data, tokenizer
 
 def build_classifier():
@@ -72,6 +79,7 @@ def train_model(model, training_data):
 if __name__ == "__main__":
     data = import_data("/home/gringle/Downloads/trump-tweets.csv")
     data, tokenizer = tokenize(data)
+    print(data)
     training, testing = split_data(data)
 
     training_tweets = training["tokenized_text"]
