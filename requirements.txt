@@ -16,6 +16,8 @@ google-pasta==0.1.8
 grpcio==1.25.0
 h5py==2.10.0
 idna==2.8
+imbalanced-learn==0.5.0
+imblearn==0.0
 jmespath==0.9.4
 joblib==0.14.0
 Keras==2.3.1
